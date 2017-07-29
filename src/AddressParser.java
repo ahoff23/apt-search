@@ -27,33 +27,43 @@ public class AddressParser
         /*
          * Generate a HashMap of all cookies sent in the request.
          *
-         * TODO: This is probably overkill. We need to update D_ZUID when our
-         * session is flagged as a bot, but the rest are not necessarily
+         * TODO: This is probably overkill. We need to update a few cookies when
+         * our session is flagged as a bot, but the rest are not necessarily
          * required. Trim this list down.
          *
-         * TODO: Find a way to automate retrieval of D_ZUID.
+         * TODO: Find a way to automate retrieval of relevant cookies.
          */
         HashMap<String, String> cookies = new HashMap<String, String>();
+
+        /*
+         * These cookies seem to be constant.
+         */
         cookies.put("streeteasy_site", "nyc");
-        cookies.put("_se_t", "fc1ca76a-c389-4687-81b0-8a15ffbd0605");
-        cookies.put("ki_s", "152716%3A0.0.0.0.0");
-        cookies.put("se%3Asearch%3Asales%3Astate","%7C%7C%7C%7C");
-        cookies.put("se%3Asearch%3Ashared%3Astate", "109%7C2%7C%7Cfalse");
+        cookies.put("OX_sd", "1");
+        cookies.put("last_search_tab", "rentals");
+        cookies.put("ki_r", "");
+
+        /*
+         * These don't appear in the normal cookies window, but were sent in
+         * the request.
+         */
         cookies.put("anon_searcher_stage", "search_made");
         cookies.put("tracked_search", "2754942");
-        cookies.put("last_search_tab", "rentals");
+        cookies.put("se%3Asearch%3Asales%3Astate","%7C%7C%7C%7C");
+        cookies.put("se%3Asearch%3Ashared%3Astate", "109%7C2%7C%7Cfalse");
+
+        /*
+         * These may or may not change.
+         */
+        cookies.put("ki_s", "152716%3A0.0.0.0.0");
         cookies.put("se_rs", "2754942");
         cookies.put("D_IID", "E8DB3948-F01C-37FE-BCD0-7BF86EC0E8F5");
         cookies.put("D_UID", "A001B5E7-E22B-317A-84A6-F334B28FBE1C");
-        cookies.put("D_ZID", "AF013A59-178B-3515-8BEA-7CF2C66216DE");
-        cookies.put("D_HID", "A57FA764-9F89-3680-815C-A616267016C2");
         cookies.put("se_lsa", "2017-07-29+16%3A49%3A49+-0400");
-        cookies.put("OX_sd", "1");
         cookies.put("_dc_gtm_UA-122241-1", "1");
         cookies.put("_ga", "GA1.2.1837680605.1501348833");
         cookies.put("_gid", "GA1.2.44095435.1501348833");
         cookies.put("_gat_UA-122241-1", "1");
-        cookies.put("ki_r", "");
         cookies.put(
             "se%3Asearch%3Arentals%3Astate",
             "false%7C3500%7C4000%7C%7C");
@@ -83,10 +93,16 @@ public class AddressParser
             "d802cbbfd2db1033c9ae33336f38fecba5ebd1");
 
         /*
-         * As of now, D_ZUID is the only cookie that I know needs to be updated
-         * and sent.
+         * These definitely change, but I'm not sure if it's relevant.
          */
-        cookies.put("D_ZUID", "A5411ED3-DD07-338D-A82F-79D0A57762FA");
+        cookies.put("_se_t", "1ea8341b-f042-4e77-8b5b-5073063a040d");
+        cookies.put("D_ZID", "C13DE44F-7E55-30DC-9F99-E1C75D13944A");
+
+        /*
+         * These cookies definitely need to be updated.
+         */
+        cookies.put("D_ZUID", "D51485F9-7957-34EF-863F-89B1EA787660");
+        cookies.put("D_HID", "5D4CF2B6-AF7C-30B4-B03B-ABB85376D990");
 
         /*
          * Connect to the URL.
@@ -117,11 +133,31 @@ public class AddressParser
         return addresses;
     }
 
+    /**
+     * Parse a URL from configurable parameters.
+     *
+     * @param neighborhood The neighborhood to search.
+     * @param min_price The minimum monthly rent.
+     * @param max_price The maximum monthly rent.
+     * @param num_beds The number of bedrooms requested.
+     * @param page_num The current page number in the search.
+     *
+     * @return A URL string based on the chosen parameters.
+     */
+    private static String generateUrl(final String neighborhood,
+                                      final int min_price,
+                                      final int max_price,
+                                      final int num_beds,
+                                      final int page_num)
+    {
+        return "http://streeteasy.com/for-rent/" + neighborhood + "/price:" +
+                     min_price + "-" + max_price + "%7Cbeds:" + num_beds +
+                     "?page=" + page_num;
+    }
 
     public static void main(String[] args) throws IOException
     {
-        final String url =
-            "http://streeteasy.com/for-rent/les/price:3500-4000%7Cbeds:2";
+        final String url = generateUrl("les", 3500, 4000, 2, 2);
 
         ArrayList<String> addresses = getAddresses(url);
 
