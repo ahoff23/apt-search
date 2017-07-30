@@ -1,5 +1,5 @@
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.HashMap;
 import org.jsoup.Jsoup;
 
@@ -10,10 +10,10 @@ public class AddressParser
      *
      * @param url The URL to scrape.
      *
-     * @return An ArrayList of String objects, each of which represents an
+     * @return A HashSet of String objects, each of which represents an
      *         address.
      */
-    private static ArrayList<String> getAddresses(final String url)
+    private static HashSet<String> getAddresses(final String url)
         throws IOException
     {
         /*
@@ -123,12 +123,14 @@ public class AddressParser
          * Parse for addresses. The first string is a bunch of garbage prior to
          * the first address.
          */
-        ArrayList<String> addresses = new ArrayList<>();
+        HashSet<String> addresses = new HashSet<>();
         for (int i = 1; i < split_str.length; ++i)
         {
             addresses.add(
                 split_str[i].substring(0, split_str[i].indexOf("\"")));
         }
+
+        System.out.println(addresses.size());
 
         return addresses;
     }
@@ -155,11 +157,49 @@ public class AddressParser
                      "?page=" + page_num;
     }
 
+    /**
+     * Get a list of addresses based on configurable parameters.
+     *
+     * @param neighborhood The neighborhood to search.
+     * @param min_price The minimum monthly rent.
+     * @param max_price The maximum monthly rent.
+     * @param num_beds The number of bedrooms requested.
+     *
+     * @return A HashSet of addresses that fit the chosen parameters.
+     */
+    public static HashSet<String> getAddresses(final String neighborhood,
+                                               final int min_price,
+                                               final int max_price,
+                                               final int num_beds)
+    {
+        /*
+         * Iterate up to 5 pages. If a failed load leadss to an IOException, we
+         * just break early.
+         */
+        HashSet<String> addresses = new HashSet<>();
+        for (int i = 1; i <= 5; ++i)
+        {
+            try
+            {
+                addresses.addAll(
+                    getAddresses(generateUrl(neighborhood,
+                                             min_price,
+                                             max_price,
+                                             num_beds,
+                                             i)));
+            }
+            catch (IOException e)
+            {
+                break;
+            }
+        }
+
+        return addresses;
+    }
+
     public static void main(String[] args) throws IOException
     {
-        final String url = generateUrl("les", 3500, 4000, 2, 2);
-
-        ArrayList<String> addresses = getAddresses(url);
+        HashSet<String> addresses = getAddresses("manhattan", 3500, 4000, 2);
 
         for (String address : addresses)
         {
