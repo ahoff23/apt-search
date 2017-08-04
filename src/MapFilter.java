@@ -12,35 +12,91 @@ import java.util.HashSet;
 
 public class MapFilter
 {
+    /**
+     * The JSON response we expect from the Google Maps API.
+     */
     private class JsonData
     {
+        /**
+         * The distance element for a given search. We ignore this for now.
+         */
         private class Distance
         {
+            /**
+             * The travel distance.
+             */
             int value;
+
+            /**
+             * The travel distance as a readable string.
+             */
             String text;
         }
 
+        /**
+         * The travel duration for a given search.
+         */
         private class Duration
         {
+            /**
+             * The travel time in seconds.
+             */
             int value;
+
+            /**
+             * The travel time as a readable string.
+             */
             String text;
         }
 
+        /**
+         * An element contains information regaring a single point-to-point
+         * travel search i.e. a single origin and a single destination.
+         */
         private class Element
         {
+            /**
+             * The query's status.
+             */
             String status;
+
+            /**
+             * The query's duration.
+             */
             Distance duration;
+
+            /**
+             * The query's distance.
+             */
             Duration distance;
         }
 
+        /**
+         * A row maintains all elements starting from a  single origin.
+         */
         private class Row
         {
             ArrayList<Element> elements;
         }
 
+        /**
+         * The status of the query as a whole.
+         */
         String status;
+
+        /**
+         * An echoed list of origins.
+         */
         ArrayList<String> origin_addresses;
+
+        /**
+         * An echoed list of destinations.
+         */
         ArrayList<String> destination_addresses;
+
+        /**
+         * All rows returned by the search.
+         */
         ArrayList<Row> rows;
     }
 
@@ -85,38 +141,68 @@ public class MapFilter
         final String key = "";
 
         /*
-         * Iterate over each address.
+         * Iterate over each address and add it to the origin addresses.
          */
+        String origins = "";
         for(Iterator<String> itr = addresses.iterator(); itr.hasNext();)
         {
             String address = itr.next();
 
             /*
-             * Format the addresses before searching.
+             * Format the addresses before appending.
              */
             final String formatted_address = address.replaceAll(" ", "+");
-            final String formatted_destination =
-                destination.replaceAll(" ", "+");
 
-            final String url =
-                "https://maps.googleapis.com/maps/api/distancematrix/json?" +
-                "origins=" + formatted_address +
-                "&destinations=" + formatted_destination +
-                "&key=" + key;
+            if (origins != "")
+                origins += "|";
+            origins += formatted_address;
+        }
+
+        /*
+         * Create the desination string, then create the entire url.
+         */
+        final String formatted_destination = destination.replaceAll(" ", "+");
+        final String url =
+            "https://maps.googleapis.com/maps/api/distancematrix/json?" +
+            "origins=" + origins +
+            "&destinations=" + formatted_destination +
+            "&key=" + key;
+
+        /*
+         * Query the google maps API.
+         */
+        InputStream stream = new URL(url).openStream();
+        Reader reader = new InputStreamReader(stream, "UTF-8");
+        JsonData data = new Gson().fromJson(reader, JsonData.class);
+
+        /*
+         * Validate that our response row count matches the number of origins
+         * we sent.
+         */
+        ArrayList<JsonData.Row> responses = data.rows;
+        if (responses.size() != addresses.size())
+            throw new IOException("Number of origins does not match response.");
+
+        /*
+         * Get the travel time between the origin addresses and the target.
+         * If the travel time exceeds the maximum travel time, remove the
+         * origin address.
+         */
+        int row_idx = 0;
+        for (Iterator<String> itr = addresses.iterator(); itr.hasNext();)
+        {
+            itr.next();
+
+            final JsonData.Element element =
+                responses.get(row_idx).elements.get(0);
 
             /*
-             * Get the travel time between the address and
-             * the target. If the travel time exceeds the maximum travel time,
-             * remove the address.
+             * Multiply by 60 to compare both as seconds.
              */
-            InputStream stream = new URL(url).openStream();
-            Reader reader = new InputStreamReader(stream, "UTF-8");
-            JsonData data = new Gson().fromJson(reader, JsonData.class);
-            if (data.rows.get(0).elements.get(0).duration.value / 60 >
-                max_travel_time)
-            {
+            if (element.duration.value > max_travel_time * 60)
                 itr.remove();
-            }
+
+            ++row_idx;
         }
     }
 

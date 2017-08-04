@@ -45,6 +45,8 @@ public class AddressParser
         cookies.put("last_search_tab", "rentals");
         cookies.put("ki_r", "");
         cookies.put("ki_s", "152716%3A0.0.0.0.0");
+        cookies.put("D_IID", "E8DB3948-F01C-37FE-BCD0-7BF86EC0E8F5");
+        cookies.put("D_UID", "A001B5E7-E22B-317A-84A6-F334B28FBE1C");
 
         /*
          * These don't appear in the normal cookies window, but were sent in
@@ -59,8 +61,6 @@ public class AddressParser
          * These may or may not change.
          */
         cookies.put("se_rs", "2754942");
-        cookies.put("D_IID", "E8DB3948-F01C-37FE-BCD0-7BF86EC0E8F5");
-        cookies.put("D_UID", "A001B5E7-E22B-317A-84A6-F334B28FBE1C");
         cookies.put("se_lsa", "2017-08-03+00%3A35%3A40+-0400");
         cookies.put("_dc_gtm_UA-122241-1", "1");
         cookies.put("_ga", "GA1.2.1837680605.1501348833");
@@ -71,14 +71,14 @@ public class AddressParser
             "false%7C3500%7C4000%7C%7C");
         cookies.put(
             "__gads",
-            "ID=ec92b7f405e9fa75:T=1501348832:S=ALNI_MYH4" +
-            "aV7aIS60Ega_i5bIGKeqSAGtQ");
+            "ID=34f06650bc9b6a8d:T=1501818271:S=ALNI_MZw2_h-FyRNd4cVRkIRJ9pU" +
+            "9zV15g");
         cookies.put(
             "D_SID",
             "73.35.197.188:ikKsNcL5LNRzosYi5c22rkzK1QqaELAPUesnX+W+ByQ");
         cookies.put(
             "ki_t",
-            "1501348833884%3B1501348833884%3B1501358613593%3B1%3B13");
+            "1501818095896%3B1501818095896%3B1501818095896%3B1%3B1");
         cookies.put(
             "_ses",
             "BAh7DUkiD3Nlc3Npb25faWQGOgZFVEkiJThlMmRiZWVjYTJhYmZiNmM4OTVjMjE0" +
@@ -97,14 +97,14 @@ public class AddressParser
         /*
          * These definitely change, but I'm not sure if it's relevant.
          */
-        cookies.put("_se_t", "9fe9b068-9adc-44b1-85a1-0c5d84f590c9");
-        cookies.put("D_ZID", "AF013A59-178B-3515-8BEA-7CF2C66216DE");
+        cookies.put("_se_t", "ef23bb0f-0f88-45fe-9b4a-6801558eb11a");
+        cookies.put("D_ZID", "C13DE44F-7E55-30DC-9F99-E1C75D13944A");
 
         /*
          * These cookies definitely need to be updated.
          */
-        cookies.put("D_ZUID", "D51485F9-7957-34EF-863F-89B1EA787660");
-        cookies.put("D_HID", "5D4CF2B6-AF7C-30B4-B03B-ABB85376D990");
+        cookies.put("D_ZUID", "A5411ED3-DD07-338D-A82F-79D0A57762FA");
+        cookies.put("D_HID", "A57FA764-9F89-3680-815C-A616267016C2");
 
         /*
          * Connect to the URL.
@@ -132,6 +132,9 @@ public class AddressParser
                 split_str[i].substring(0, split_str[i].indexOf("\"")));
         }
 
+        /*
+         * Print the number of addresses for debugging purposes.
+         */
         System.out.println(addresses.size());
 
         return addresses;
