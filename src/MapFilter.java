@@ -1,3 +1,5 @@
+package apt_search;
+
 import com.google.gson.Gson;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -126,21 +128,6 @@ public class MapFilter
     public HashSet<String> getAddresses()
     {
         return new HashSet<String>(addresses);
-    }
-
-    public static void main(String[] args) throws IOException
-    {
-        MapFilter filter = new MapFilter();
-        filter.add("328 E 11th Street New York NY");
-        filter.add("103 Avenue A New York NY");
-        filter.add("5023 22nd Seattle WA");
-
-        filter.filterAddresses("100 6th Ave New York NY", 20);
-
-        for (String str : filter.addresses)
-        {
-            System.out.println(str);
-        }
     }
 
     private HashSet<String> addresses;

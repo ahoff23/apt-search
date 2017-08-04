@@ -1,3 +1,5 @@
+package apt_search;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.HashMap;
@@ -42,6 +44,7 @@ public class AddressParser
         cookies.put("OX_sd", "1");
         cookies.put("last_search_tab", "rentals");
         cookies.put("ki_r", "");
+        cookies.put("ki_s", "152716%3A0.0.0.0.0");
 
         /*
          * These don't appear in the normal cookies window, but were sent in
@@ -55,11 +58,10 @@ public class AddressParser
         /*
          * These may or may not change.
          */
-        cookies.put("ki_s", "152716%3A0.0.0.0.0");
         cookies.put("se_rs", "2754942");
         cookies.put("D_IID", "E8DB3948-F01C-37FE-BCD0-7BF86EC0E8F5");
         cookies.put("D_UID", "A001B5E7-E22B-317A-84A6-F334B28FBE1C");
-        cookies.put("se_lsa", "2017-07-29+16%3A49%3A49+-0400");
+        cookies.put("se_lsa", "2017-08-03+00%3A35%3A40+-0400");
         cookies.put("_dc_gtm_UA-122241-1", "1");
         cookies.put("_ga", "GA1.2.1837680605.1501348833");
         cookies.put("_gid", "GA1.2.44095435.1501348833");
@@ -95,8 +97,8 @@ public class AddressParser
         /*
          * These definitely change, but I'm not sure if it's relevant.
          */
-        cookies.put("_se_t", "1ea8341b-f042-4e77-8b5b-5073063a040d");
-        cookies.put("D_ZID", "C13DE44F-7E55-30DC-9F99-E1C75D13944A");
+        cookies.put("_se_t", "9fe9b068-9adc-44b1-85a1-0c5d84f590c9");
+        cookies.put("D_ZID", "AF013A59-178B-3515-8BEA-7CF2C66216DE");
 
         /*
          * These cookies definitely need to be updated.
@@ -195,15 +197,5 @@ public class AddressParser
         }
 
         return addresses;
-    }
-
-    public static void main(String[] args) throws IOException
-    {
-        HashSet<String> addresses = getAddresses("manhattan", 3500, 4000, 2);
-
-        for (String address : addresses)
-        {
-            System.out.println(address);
-        }
     }
 }
