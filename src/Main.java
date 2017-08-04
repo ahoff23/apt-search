@@ -1,7 +1,7 @@
 
-
 import apt_search.MapFilter;
 import apt_search.AddressParser;
+
 import java.io.IOException;
 import java.util.HashSet;
 
