@@ -3,6 +3,7 @@ import apt_search.MapFilter;
 import apt_search.AddressParser;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashSet;
 
 public class Main
@@ -21,9 +22,11 @@ public class Main
         MapFilter.filterAddresses(addrs, "100 6th Ave New York NY", 20);
 
         /*
-         * Print the list of addresses.
+         * Create a file and print the output.
          */
+        PrintWriter writer = new PrintWriter("../output", "UTF-8");
         for (AddressParser.UrlAddress addr : addrs)
-            System.out.println(addr.address);
+            writer.println("<a href=\"" + addr.url + "\">" + addr.address + "</a><br/>");
+        writer.close();
     }
 }
