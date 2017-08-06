@@ -192,10 +192,12 @@ public class MapFilter
         int row_idx = 0;
         for (Iterator<String> itr = addresses.iterator(); itr.hasNext();)
         {
-            itr.next();
+            String str = itr.next();
 
             final JsonData.Element element =
                 responses.get(row_idx).elements.get(0);
+
+            System.out.println(str + ": " + element.duration.text);
 
             /*
              * Multiply by 60 to compare both as seconds.
