@@ -8,19 +8,19 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.HashSet;
+import java.util.Set;
 
 public class MapFilter
 {
     /**
      * The JSON response we expect from the Google Maps API.
      */
-    private class JsonData
+    private static class JsonData
     {
         /**
          * The distance element for a given search. We ignore this for now.
          */
-        private class Distance
+        private static class Distance
         {
             /**
              * The travel distance.
@@ -36,7 +36,7 @@ public class MapFilter
         /**
          * The travel duration for a given search.
          */
-        private class Duration
+        private static class Duration
         {
             /**
              * The travel time in seconds.
@@ -53,7 +53,7 @@ public class MapFilter
          * An element contains information regaring a single point-to-point
          * travel search i.e. a single origin and a single destination.
          */
-        private class Element
+        private static class Element
         {
             /**
              * The query's status.
@@ -72,9 +72,9 @@ public class MapFilter
         }
 
         /**
-         * A row maintains all elements starting from a  single origin.
+         * A row maintains all elements starting from a single origin.
          */
-        private class Row
+        private static class Row
         {
             ArrayList<Element> elements;
         }
@@ -101,32 +101,18 @@ public class MapFilter
     }
 
     /**
-     * Constructor.
-     */
-    public MapFilter()
-    {
-        addresses = new HashSet<>();
-    }
-
-    /**
-     * Add a set of addresses to the member set of addresses.
-     *
-     * @param str An address to add.
-     */
-    public void add(final String str)
-    {
-        addresses.add(str);
-    }
-
-    /**
      * Filter all addresses against a target address and travel time.
      *
+     * @param addresses A HashSet of possible addresses. The class must support
+     *        a function to return a String address.
      * @param destination The destination address.
      * @param max_travel_time The max travel time to filter against. Units in
      *        minutes.
      */
-    public void filterAddresses(final String destination,
-                                final int max_travel_time) throws IOException
+    public static void filterAddresses(
+        Set<? extends Address> addresses,
+        final String destination,
+        final int max_travel_time) throws IOException
     {
         /*
          * Store a user agent for the HTTP request.
@@ -136,22 +122,17 @@ public class MapFilter
             "(KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36";
 
         /*
-         * Key to use for the google maps API.
-         */
-        final String key = "";
-
-        /*
          * Iterate over each address and add it to the origin addresses.
          */
         String origins = "";
-        for(Iterator<String> itr = addresses.iterator(); itr.hasNext();)
+        for(Address addr : addresses)
         {
-            String address = itr.next();
+            String str_addr = addr.address;
 
             /*
              * Format the addresses before appending.
              */
-            final String formatted_address = address.replaceAll(" ", "+") +
+            final String formatted_address = str_addr.replaceAll(" ", "+") +
                 "+New+York+,+NY";
 
             if (origins != "")
@@ -160,14 +141,15 @@ public class MapFilter
         }
 
         /*
-         * Create the desination string, then create the entire url.
+         * Create the desination string, then create the entire url with an
+         * empty key.
          */
         final String formatted_destination = destination.replaceAll(" ", "+");
         final String url =
             "https://maps.googleapis.com/maps/api/distancematrix/json?" +
             "origins=" + origins +
             "&destinations=" + formatted_destination +
-            "&key=" + key;
+            "&key=";
 
         /*
          * Query the google maps API.
@@ -190,14 +172,15 @@ public class MapFilter
          * origin address.
          */
         int row_idx = 0;
-        for (Iterator<String> itr = addresses.iterator(); itr.hasNext();)
+        for (Iterator<? extends Address> itr = addresses.iterator();
+             itr.hasNext();)
         {
-            String str = itr.next();
+            Address addr = itr.next();
 
             final JsonData.Element element =
                 responses.get(row_idx).elements.get(0);
 
-            System.out.println(str + ": " + element.duration.text);
+            System.out.println(addr.address + ": " + element.duration.text);
 
             /*
              * Multiply by 60 to compare both as seconds.
@@ -208,16 +191,4 @@ public class MapFilter
             ++row_idx;
         }
     }
-
-    /**
-     * Get all addresses.
-     *
-     * @return The current set of addresses.
-     */
-    public HashSet<String> getAddresses()
-    {
-        return new HashSet<String>(addresses);
-    }
-
-    private HashSet<String> addresses;
 }
