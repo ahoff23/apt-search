@@ -180,6 +180,7 @@ public class AddressParser
                                                final int min_price,
                                                final int max_price,
                                                final int num_beds)
+        throws IOException
     {
         /*
          * Iterate up to 5 pages. If a failed load leadss to an IOException, we
@@ -188,19 +189,12 @@ public class AddressParser
         HashSet<String> addresses = new HashSet<>();
         for (int i = 1; i <= 5; ++i)
         {
-            try
-            {
-                addresses.addAll(
-                    getAddresses(generateUrl(neighborhood,
-                                             min_price,
-                                             max_price,
-                                             num_beds,
-                                             i)));
-            }
-            catch (IOException e)
-            {
-                break;
-            }
+            addresses.addAll(
+                getAddresses(generateUrl(neighborhood,
+                                         min_price,
+                                         max_price,
+                                         num_beds,
+                                         i)));
         }
 
         return addresses;
