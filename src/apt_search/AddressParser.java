@@ -8,14 +8,32 @@ import org.jsoup.Jsoup;
 public class AddressParser
 {
     /**
+     * Class maintaing information relevant to a single address.
+     */
+    public static class UrlAddress extends Address
+    {
+        /**
+         * The URL of the listing.
+         */
+        public String url;
+
+        /**
+         * Function that validates if two UrlAddresses are equal.
+         */
+        public boolean equals(UrlAddress addr)
+        {
+            return url == addr.url;
+        }
+    }
+
+    /**
      * Scrape a given URL for addresses.
      *
      * @param url The URL to scrape.
      *
-     * @return A HashSet of String objects, each of which represents an
-     *         address.
+     * @return A HashSet of UrlAddress objects.
      */
-    private static HashSet<String> getAddresses(final String url)
+    private static HashSet<UrlAddress> getAddresses(final String url)
         throws IOException
     {
         /*
@@ -121,25 +139,39 @@ public class AddressParser
                           .html();
 
         /*
-         * Split the document based on the header for each address.
+         * Split the document along rental listings.
          */
-        String[] split_str = doc.split("streetAddress\":\"");
+        String[] split_str = doc.split("data-gtm-listing-type=\"rental\"");
 
         /*
-         * Parse for addresses. The first string is a bunch of garbage prior to
-         * the first address.
+         * Get the link name and address of each listing.
          */
-        HashSet<String> addresses = new HashSet<>();
+        HashSet<UrlAddress> addresses = new HashSet<>();
         for (int i = 1; i < split_str.length; ++i)
         {
-            addresses.add(
-                split_str[i].substring(0, split_str[i].indexOf("\"")));
-        }
+            /*
+             * Get the link URL if one exists.
+             */
+            UrlAddress addr = new UrlAddress();
+            String[] sub_split_str_1 = split_str[i].split("href=\"");
+            if (sub_split_str_1.length == 1)
+                continue;
+            addr.url = "https://www.streeteasy.com/" +
+                sub_split_str_1[1].substring(
+                    0, sub_split_str_1[1].indexOf("\""));
 
-        /*
-         * Print the number of addresses for debugging purposes.
-         */
-        System.out.println(addresses.size());
+            /*
+             * If an address name exists, add it to the Address instance and
+             * add the completed instance to the HashSet. Incomplete Addresses
+             * should be skipped.
+             */
+            String[] sub_split_str_2 = sub_split_str_1[1].split("img alt=\"");
+            if (sub_split_str_2.length == 1)
+                continue;
+            addr.address = sub_split_str_2[1].substring(
+                0, sub_split_str_2[1].indexOf("\""));
+            addresses.add(addr);
+        }
 
         return addresses;
     }
@@ -176,17 +208,17 @@ public class AddressParser
      *
      * @return A HashSet of addresses that fit the chosen parameters.
      */
-    public static HashSet<String> getAddresses(final String neighborhood,
-                                               final int min_price,
-                                               final int max_price,
-                                               final int num_beds)
+    public static HashSet<UrlAddress> getAddresses(final String neighborhood,
+                                                   final int min_price,
+                                                   final int max_price,
+                                                   final int num_beds)
         throws IOException
     {
         /*
          * Iterate up to 5 pages. If a failed load leadss to an IOException, we
          * just break early.
          */
-        HashSet<String> addresses = new HashSet<>();
+        HashSet<UrlAddress> addresses = new HashSet<>();
         for (int i = 1; i <= 5; ++i)
         {
             addresses.addAll(
