@@ -55,8 +55,14 @@ public class MapOutput
                     "};";
             html += "var marker" + index + " = new google.maps.Marker({\n" +
                     "position: loc" + index + ",\n" +
+                    "url: \'" + addr.url + "\',\n" +
                     "map: map\n" +
                     "});\n";
+
+            html +=
+                "google.maps.event.addListener(marker" + index +
+                ", 'click', function() { window.location.href = marker" +
+                index + ".url});";
 
             ++index;
         }
