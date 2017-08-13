@@ -215,18 +215,25 @@ public class AddressParser
         throws IOException
     {
         /*
-         * Iterate up to 5 pages. If a failed load leadss to an IOException, we
+         * Iterate up to 5 pages. If a failed load leadss to a bad URL, we
          * just break early.
          */
         HashSet<UrlAddress> addresses = new HashSet<>();
         for (int i = 1; i <= 5; ++i)
         {
-            addresses.addAll(
-                getAddresses(generateUrl(neighborhood,
-                                         min_price,
-                                         max_price,
-                                         num_beds,
-                                         i)));
+            try
+            {
+                addresses.addAll(
+                    getAddresses(generateUrl(neighborhood,
+                                             min_price,
+                                             max_price,
+                                             num_beds,
+                                             i)));
+            }
+            catch (org.jsoup.HttpStatusException e)
+            {
+                break;
+            }
         }
 
         return addresses;
