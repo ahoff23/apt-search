@@ -144,12 +144,16 @@ public class MapFilter
          * Create the desination string, then create the entire url with an
          * empty key.
          */
+        final String key = "AIzaSyAeEM8OUkWWMq3qTlkJkWVtDJIf4DvZgig";
         final String formatted_destination = destination.replaceAll(" ", "+");
         final String url =
             "https://maps.googleapis.com/maps/api/distancematrix/json?" +
             "origins=" + origins +
             "&destinations=" + formatted_destination +
-            "&key=";
+            "&mode=transit" +
+            "&transit_mode=subway" +
+            "&transit_routing_preference=fewer_transfers" +
+            "&key=" + key;
 
         /*
          * Query the google maps API.
