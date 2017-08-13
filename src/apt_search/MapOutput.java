@@ -61,8 +61,8 @@ public class MapOutput
 
             html +=
                 "google.maps.event.addListener(marker" + index +
-                ", 'click', function() { window.location.href = marker" +
-                index + ".url});";
+                ", 'click', function() { window.open(marker" +
+                index + ".url)});";
 
             ++index;
         }
