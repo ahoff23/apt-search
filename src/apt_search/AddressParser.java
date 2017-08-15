@@ -117,6 +117,12 @@ public class AddressParser
         String[] split_str = doc.split("data-gtm-listing-type=\"rental\"");
 
         /*
+         * Throw an IOException if we have an invalid page.
+         */
+        if (split_str.length <= 1)
+            throw new IOException("Invalid streeteasy page.");
+
+        /*
          * Get the link name and address of each listing.
          */
         HashSet<UrlAddress> addresses = new HashSet<>();
@@ -197,7 +203,8 @@ public class AddressParser
          * just break early.
          */
         HashSet<UrlAddress> addresses = new HashSet<>();
-        for (int i = 1; i <= 5; ++i)
+        int index = 1;
+        while (true)
         {
             try
             {
@@ -206,13 +213,19 @@ public class AddressParser
                                              min_price,
                                              max_price,
                                              num_beds,
-                                             i),
+                                             index),
                                  neighborhood));
             }
             catch (org.jsoup.HttpStatusException e)
             {
                 break;
             }
+            catch (IOException e)
+            {
+                break;
+            }
+
+            ++index;
         }
 
         return addresses;
