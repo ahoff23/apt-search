@@ -153,8 +153,7 @@ public class GeocodeAddress
         /*
          * Construct the query string.
          */
-        final String formatted_addr = addr.replaceAll(" ", "+") +
-                                      "+New+York,+NY";
+        final String formatted_addr = addr.replaceAll(" ", "+");
         final String key = "AIzaSyA1CCZ5DuDQN83MpfKhproce9djH139GLg";
         final String url =
             "https://maps.googleapis.com/maps/api/geocode/json?address=" +
@@ -181,7 +180,6 @@ public class GeocodeAddress
         /*
          * Return the latitude and longitude location.
          */
-        System.out.println(data.results.get(0).geometry.location.lat);
         return data.results.get(0).geometry.location;
     }
 }

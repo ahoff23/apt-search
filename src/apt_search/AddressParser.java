@@ -30,10 +30,12 @@ public class AddressParser
      * Scrape a given URL for addresses.
      *
      * @param url The URL to scrape.
+     * @param neighborhood The neighborhood to search.
      *
      * @return A HashSet of UrlAddress objects.
      */
-    private static HashSet<UrlAddress> getAddresses(final String url)
+    private static HashSet<UrlAddress> getAddresses(final String url,
+                                                    final String neighborhood)
         throws IOException
     {
         /*
@@ -170,6 +172,11 @@ public class AddressParser
                 continue;
             addr.address = sub_split_str_2[1].substring(
                 0, sub_split_str_2[1].indexOf("\""));
+
+            if (neighborhood.toLowerCase() == "brooklyn")
+                addr.address += " Brooklyn, NY";
+            else
+                addr.address += " New York, NY";
             addresses.add(addr);
         }
 
@@ -228,7 +235,8 @@ public class AddressParser
                                              min_price,
                                              max_price,
                                              num_beds,
-                                             i)));
+                                             i),
+                                 neighborhood));
             }
             catch (org.jsoup.HttpStatusException e)
             {

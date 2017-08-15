@@ -132,9 +132,7 @@ public class MapFilter
             /*
              * Format the addresses before appending.
              */
-            final String formatted_address = str_addr.replaceAll(" ", "+") +
-                "+New+York+,+NY";
-
+            final String formatted_address = str_addr.replaceAll(" ", "+");
             if (origins != "")
                 origins += "|";
             origins += formatted_address;
