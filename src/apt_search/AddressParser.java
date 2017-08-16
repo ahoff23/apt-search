@@ -13,6 +13,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.jsoup.Jsoup;
+import java.util.Random;
 
 public class AddressParser
 {
@@ -27,7 +28,7 @@ public class AddressParser
      * Our canvas image needs to be unique. We just have a dummy value that we
      * increment after each request. Overflow shouldn't be a problem.
      */
-    static private int img_num = 1;
+    static private int img_num = 0;
 
     /**
      * Class maintaing information relevant to a single address.
@@ -217,6 +218,12 @@ public class AddressParser
                                                    final int num_beds)
         throws IOException
     {
+        /*
+         * Get a new random number for the image number.
+         */
+        Random rand = new Random();
+        img_num = rand.nextInt();
+
         /*
          * Iterate up to 5 pages. If a failed load leadss to a bad URL, we
          * just break early.
