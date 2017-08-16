@@ -5,9 +5,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.NullPointerException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 public class MapFilter
@@ -101,18 +104,15 @@ public class MapFilter
     }
 
     /**
-     * Filter all addresses against a target address and travel time.
+     * Update a HashMap whose keys are addresses by setting the corresponding
+     * values to the address' travel times.
      *
-     * @param addresses A HashSet of possible addresses. The class must support
-     *        a function to return a String address.
+     * @param addresses A HashMap of addresses to query.
      * @param destination The destination address.
-     * @param max_travel_time The max travel time to filter against. Units in
-     *        minutes.
      */
-    public static void filterAddresses(
-        Set<? extends Address> addresses,
-        final String destination,
-        final int max_travel_time) throws IOException
+    private static void getTravelTimes(HashMap<Address, Integer> addresses,
+                                       final String destination)
+        throws IOException
     {
         /*
          * Store a user agent for the HTTP request.
@@ -125,9 +125,9 @@ public class MapFilter
          * Iterate over each address and add it to the origin addresses.
          */
         String origins = "";
-        for(Address addr : addresses)
+        for (Address entry : addresses.keySet())
         {
-            String str_addr = addr.address;
+            final String str_addr = entry.address;
 
             /*
              * Format the addresses before appending.
@@ -160,37 +160,95 @@ public class MapFilter
         Reader reader = new InputStreamReader(stream, "UTF-8");
         JsonData data = new Gson().fromJson(reader, JsonData.class);
 
-        /*
-         * Validate that our response row count matches the number of origins
-         * we sent.
-         */
-        ArrayList<JsonData.Row> responses = data.rows;
-        if (responses.size() != addresses.size())
-            throw new IOException("Number of origins does not match response.");
-
-        /*
-         * Get the travel time between the origin addresses and the target.
-         * If the travel time exceeds the maximum travel time, remove the
-         * origin address.
-         */
-        int row_idx = 0;
-        for (Iterator<? extends Address> itr = addresses.iterator();
-             itr.hasNext();)
+        if (addresses.size() != data.rows.size())
         {
-            Address addr = itr.next();
+            System.out.println("ERROR - query size does not match result size.");
+            System.out.println("Query size: " + addresses.size());
+            System.out.println("Results size: " + data.rows.size());
+            return;
+        }
 
-            final JsonData.Element element =
-                responses.get(row_idx).elements.get(0);
+        int index = 0;
+        for (Address entry : addresses.keySet())
+        {
+            if (data.rows.size() <= index)
+            {
+                System.out.println("ERROR - Bad result 1.");
+                continue;
+            }
+            else if (data.rows.get(index).elements.size() == 0)
+            {
+                System.out.println("ERROR - Bad result 2.");
+                continue;
+            }
 
-            System.out.println(addr.address + ": " + element.duration.text);
+            try
+            {
+                addresses.put(
+                   entry, data.rows.get(index).elements.get(0).duration.value);
+            }
+            catch (NullPointerException e)
+            {}
+
+            ++index;
+        }
+    }
+
+    /**
+     * Filter all addresses against a target address and travel time.
+     *
+     * @param addresses A Set of possible addresses. The class must support
+     *        a function to return a String address.
+     * @param destination The destination address.
+     * @param max_travel_time The max travel time to filter against. Units in
+     *        minutes.
+     */
+    public static void filterAddresses(
+        Set<? extends Address> addresses,
+        final String destination,
+        final int max_travel_time) throws IOException
+    {
+        /*
+         * Iterate over addresses and process in batches.
+         */
+        ArrayList<HashMap<Address, Integer>> batches =
+            new ArrayList<HashMap<Address, Integer>>();
+        int addr_index = 0;
+        final int batch_size = 20;
+        for(Address addr : addresses)
+        {
+            if (addr_index % batch_size == 0)
+                batches.add(new HashMap<Address, Integer>());
+            batches.get(batches.size() - 1).put(addr, 0);
+
+            ++addr_index;
+        }
+
+        /*
+         * For each batch, get the corresponding travel times, then remove
+         * the address if the travel is too long.
+         */
+        for (HashMap<Address, Integer> batch : batches)
+        {
+            /*
+             * Fill in the travel times.
+             */
+            getTravelTimes(batch, destination);
 
             /*
-             * Multiply by 60 to compare both as seconds.
+             * Filter addresses as necessary.
              */
-            if (element.duration.value > max_travel_time * 60)
-                itr.remove();
+            for (Address entry : batch.keySet())
+            {
+                final Integer travel_time = batch.get(entry);
+                System.out.println(entry.address + ": " + travel_time / 60);
 
-            ++row_idx;
+                /*
+                 * Multiply by 60 to compare both as seconds.
+                 */
+                if (travel_time > max_travel_time * 60)
+                    addresses.remove(entry);
+            }
         }
     }
 }
